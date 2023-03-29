@@ -86,6 +86,27 @@ const login = async(req, res) => {
 
 export { login };
 
+// Lets create Logout Method
+const logout = async(req, res) => {
+    try {
+        let options = {
+            expires: new Date(Date.now()),
+            httpOnly: true,
+        }
+        res.status(200).cookie("token", null, options).json({
+            success: true,
+            message: "Logged Out Successfully"
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
+}
+
+export { logout };
+
 
 // Lets create followUser or unfollowUser function
 const followUser = async(req, res) => {
