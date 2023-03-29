@@ -53,11 +53,22 @@
 // })
 
 
-import { app } from "./app.js";
+// import { app } from "../anontalks backend/app.js";
+// import { connectDatabase } from "./config/database.js";
+
+// connectDatabase();
+
+// app.listen(process.env.PORT, ()=>{
+//     console.log(`sever is running on port: ${process.env.PORT}`);
+// })
+
+import  app  from "../anontalks backend/app.js";
 import { connectDatabase } from "./config/database.js";
+
+const thePORT = process.env.PORT;
 
 connectDatabase();
 
-app.listen(process.env.PORT, ()=>{
-    console.log(`sever is running on port: ${process.env.PORT}`);
+app.listen(thePORT, ()=>{
+    console.log(`Server is listening on Port: ${thePORT}`)
 })

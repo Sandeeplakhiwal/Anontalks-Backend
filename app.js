@@ -1,29 +1,38 @@
 import express from "express";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
+import Cors from "cors";
+import cookieParser from "cookie-parser";
+
+// IMPORTING ROUTES
+import userRouter from "../anontalks backend/routes/user.js";
+import postRouter from "../anontalks backend/routes/post.js";
 
 const app = express();
-
-
-
-// dotenv.config({path: "./config/config.env"});
-
 
 if(process.env.NODE_ENV !== "production"){
     dotenv.config({path: "./config/config.env"});
 }
 
-// Using MiddleWares
+// USING MIDDLEWARES
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); 
-
-// Importing Routes
-import post from "../anontalks backend/routes/post.js";
-import user from "../anontalks backend/routes/user.js";
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+// app.use(Cors);
 
 
-// Using Routes
-app.use("/api/v1", post);
-app.use("/api/v1", user);
+// USING ROUTES
+app.use("/api/v1", userRouter);
+app.use("/api/v1", postRouter);
 
 
-export { app };
+app.get("/", async(req, res)=>{
+    res.status(200).send("Hello Sandeep Lakhiwal")
+});
+// app.get("/api/v1", async(req, res)=>{
+//     user.find()
+//         .then((data) => {
+//             res.status(200).send(data)
+//         })
+// });
+
+export default app;

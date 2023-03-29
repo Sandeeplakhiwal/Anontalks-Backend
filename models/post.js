@@ -4,7 +4,7 @@ const postSchema = new mongoose.Schema({
     caption: String,
     image: {
         public_id: String,
-        url: String,
+        url: String
     },
     owner: {
         type: mongoose.Schema.Types.ObjectId,
@@ -12,26 +12,26 @@ const postSchema = new mongoose.Schema({
     },
     createdAt: {
         type: Date,
-        default: Date.now,
+        default: Date.now
     },
-    likes:[
+    likes: [
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User"
-        },        
-],
+        }
+    ],
     comments: [
-    {   
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User"
-        }, 
-        comment: {
-            type: String,
-            required: true
-        }       
+        {
+            user: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "User"
+            },
+            comment: {
+                type: String,
+                required: true
+            }
     }
-    ]
-})
+    ],
+});
 
-export default mongoose.model('Post', postSchema);
+export default mongoose.model("Post", postSchema);

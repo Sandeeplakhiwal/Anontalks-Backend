@@ -1,6 +1,12 @@
 import express from "express";
-import { createPost } from "../controllers/post";
+import { createPost, deletePost, getPostOfFollowing, likeAndUnlikePost } from "../../anontalks backend/controllers/post.js";
+import { isAuthenticated } from "../middlewares/auth.js";
 
-export const router = express.Router();
+const router = express.Router();
 
-router.route("/post/create").post(createPost);
+router.post("/post/upload", isAuthenticated, createPost);
+router.get("/post/:id", isAuthenticated, likeAndUnlikePost);
+router.delete("/post/:id", isAuthenticated, deletePost);
+router.get("/posts", isAuthenticated, getPostOfFollowing);
+
+export default router;
