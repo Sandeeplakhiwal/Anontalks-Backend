@@ -1,6 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
-import Cors from "cors";
+import cors from "cors"
 import cookieParser from "cookie-parser";
 
 // IMPORTING ROUTES
@@ -17,7 +17,7 @@ if(process.env.NODE_ENV !== "production"){
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-// app.use(Cors);
+// app.use(cors);
 
 
 // USING ROUTES
@@ -28,11 +28,11 @@ app.use("/api/v1", postRouter);
 app.get("/", async(req, res)=>{
     res.status(200).send("Hello Sandeep Lakhiwal")
 });
-// app.get("/api/v1", async(req, res)=>{
-//     user.find()
-//         .then((data) => {
-//             res.status(200).send(data)
-//         })
-// });
+app.get("/api/v1", async(req, res)=>{
+    users.find()
+        .then((data) => {
+            res.status(200).send(data)
+        })
+});
 
 export default app;
