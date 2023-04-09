@@ -11,7 +11,8 @@ import { register,
             getUserProfile,
              getAllUsers,
               forgotPassword,
-               resetPassword
+               resetPassword,
+               getMyPosts
 } from "../../anontalks backend/controllers/user.js";
 import { isAuthenticated } from "../middlewares/auth.js";
 
@@ -32,6 +33,7 @@ router.put("/update/profile", isAuthenticated, updateProfile);
 router.delete("/profile/delete/me", isAuthenticated, deleteMyProfile);
 
 router.get("/me", isAuthenticated, myProfile);
+router.get("/my/posts", isAuthenticated, getMyPosts);
 
 router.get("/:id", isAuthenticated, getUserProfile );
 

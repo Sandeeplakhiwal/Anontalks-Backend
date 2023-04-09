@@ -510,3 +510,29 @@ const resetPassword = async(req, res) => {
     }
 };
 export { resetPassword };
+
+const getMyPosts = async(req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+
+        const posts = [];
+
+        for(let i=0; i<user.post.length; i++){
+            const post = await Post.findById(user.post[i]).populate("likes comments.user");
+            posts.push(post);
+        }
+
+        res.status(200).json({
+            success: true, 
+            posts
+        })
+        
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
+};
+
+export { getMyPosts };
