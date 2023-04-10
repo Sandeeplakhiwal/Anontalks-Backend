@@ -358,7 +358,7 @@ export { deleteMyProfile };
 // Lets create myProfile function
 const myProfile = async(req, res) => {
     try {
-        const user = await User.findById(req.user._id).populate("post");
+        const user = await User.findById(req.user._id).populate("post followers following");
 
         res.status(200).json({
             success: true, 
@@ -378,7 +378,7 @@ export { myProfile };
 
 const getUserProfile = async(req, res) => {
     try {
-        const user = await User.findById(req.params.id).populate("post");
+        const user = await User.findById(req.params.id).populate("post followers following");
 
         if(!user){
             return res.status(404).json({
