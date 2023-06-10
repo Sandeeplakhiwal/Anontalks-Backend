@@ -1,15 +1,22 @@
 import Post from "../models/post.js";
 import User from "../models/User.js";
+import { v2 as cloudinary } from 'cloudinary';
+
 
 const createPost = async(req, res) => {
     try{
+        console.log("dekhte hai")
+        const result = await cloudinary.uploader.upload(req.body.image, {
+            folder: 'posts'
+        });
+        console.log(result);
         const newPostData = {
-            caption: req.body.caption,
-            image: {
-                public_id: req.body.public_id,
-                url: "req.body.url"
-            },
-            owner: req.user._id
+        caption: req.body.caption,
+        image: {
+            public_id: result.public_id,
+            url: result.secure_url,
+        },
+        owner: req.user._id,
         };
 
         const newPost = await Post.create(newPostData);
@@ -21,7 +28,7 @@ const createPost = async(req, res) => {
 
         res.status(201).json({
             success: true,
-            post: newPost
+            message: "Post created."
         });
     }catch(error){
         res.status(500).json({

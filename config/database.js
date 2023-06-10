@@ -9,16 +9,14 @@
 
 import mongoose from "mongoose";
 
-const connection_url = process.env.MONGO_URI;
-
-
 // DATABASE CONFINGURATION
 
-const connectDatabase = () => {
-    mongoose.connect(connection_url, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    })
-}
+const connectDatabase = async () => {
+  const { connection } = await mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+  console.log(`MongoDB connected with ${connection.host}`);
+};
 
-export { connectDatabase }
+export { connectDatabase };
