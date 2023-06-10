@@ -1,18 +1,29 @@
 import Post from "../models/post.js";
 import User from "../models/User.js";
-import { v2 as cloudinary } from "cloudinary";
+import cloudinary from "cloudinary";
+import getDataUri from "../utiils/dataURI.js";
 
 const createPost = async (req, res) => {
   try {
-    const result = await cloudinary.uploader.upload(req.body.image, {
+    const { caption } = req.body;
+    const image = req.file;
+    if (!caption && !image) {
+      res.status(400).json({
+        success: false,
+        message: "Please Fill All Fields!",
+      });
+    }
+    // console.log(image);
+    const imageUri = getDataUri(image);
+    const myCloud = await cloudinary.v2.uploader.upload(imageUri.content, {
       folder: "posts",
     });
-    console.log(result);
+
     const newPostData = {
-      caption: req.body.caption,
+      caption,
       image: {
-        public_id: result.public_id,
-        url: result.secure_url,
+        public_id: myCloud.public_id,
+        url: myCloud.secure_url,
       },
       owner: req.user._id,
     };

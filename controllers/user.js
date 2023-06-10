@@ -4,7 +4,6 @@ import { sendEmail } from "../middlewares/sendEmail.js";
 import crypto from "crypto";
 
 const register = async (req, res) => {
-  // console.log('Hello World!');
   try {
     const { name, email, password } = req.body;
 
@@ -54,7 +53,7 @@ const login = async (req, res) => {
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: "User does not exists!",
+        message: "Incorrect email or password!",
       });
     }
 
@@ -63,7 +62,7 @@ const login = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({
         success: false,
-        message: "Incorrect password!",
+        message: "Incorrect email or password!",
       });
     }
 
