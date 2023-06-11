@@ -62,8 +62,9 @@ A social media web application that allows users to connect💜 and share conten
 ```
     
 3. Set up environment variables by creating a .env file in the root directory and provide the necessary values. Refer to .env.example for required variables.
+4. Change all the imported path in app.js, server.js  and routes files that contains folder `/anontalks backend/` into capital `Anontalks-Backend`
 
-4. Start the development server:
+5. Start the development server:
 
 ```bash
   npm run dev
