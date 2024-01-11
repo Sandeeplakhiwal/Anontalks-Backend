@@ -3,51 +3,95 @@ import User from "../models/User.js";
 import cloudinary from "cloudinary";
 import getDataUri from "../utiils/dataURI.js";
 
-const createPost = async (req, res) => {
+// const createPost = async (req, res) => {
+//   try {
+//     const { caption } = req.body;
+//     const image = req.file;
+
+//     console.log("caption", caption);
+//     console.log("image", image);
+
+//     if (!caption && !image) {
+//       res.status(400).json({
+//         success: false,
+//         message: "Please Fill All Fields!",
+//       });
+//     }
+//     // console.log(image);
+//     const imageUri = getDataUri(image);
+
+//     console.log("imgUri", imageUri);
+
+//     const myCloud = await cloudinary.v2.uploader.upload(imageUri.content, {
+//       folder: "posts",
+//     });
+
+//     const newPostData = {
+//       caption,
+//       image: {
+//         public_id: myCloud.public_id,
+//         url: myCloud.secure_url,
+//       },
+//       owner: req.user._id,
+//     };
+
+//     const newPost = await Post.create(newPostData);
+//     const user = await User.findById(req.user._id);
+
+//     user.post.push(newPost._id);
+
+//     await user.save();
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Post created.",
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
+export const createPost = async (req, res) => {
   try {
     const { caption } = req.body;
-    const image = req.file;
-    if (!caption && !image) {
-      res.status(400).json({
+    const file = req.file;
+    if (!caption) {
+      return res.status(400).json({
         success: false,
-        message: "Please Fill All Fields!",
+        message: "Please enter all fields!",
       });
     }
-    // console.log(image);
-    const imageUri = getDataUri(image);
-    const myCloud = await cloudinary.v2.uploader.upload(imageUri.content, {
-      folder: "posts",
-    });
-
+    if (file) {
+      const myCloud = await cloudinary.v2.uploader.upload(file, {
+        folder: "posts",
+      });
+    }
     const newPostData = {
       caption,
       image: {
-        public_id: myCloud.public_id,
-        url: myCloud.secure_url,
+        public_id: "myCloud.public_id",
+        url: "myCloud.secure_url",
       },
       owner: req.user._id,
     };
-
     const newPost = await Post.create(newPostData);
     const user = await User.findById(req.user._id);
-
-    user.post.push(newPost._id);
-
+    user.post.unshift(newPost._id);
     await user.save();
-
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: "Post created.",
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
-
-export { createPost };
 
 // I have Created Post method now it's time for deletePost method...
 
@@ -131,7 +175,7 @@ export { likeAndUnlikePost };
 
 const commentOnPost = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
+    let post = await Post.findById(req.params.id);
 
     if (!post) {
       return res.status(404).json({
@@ -150,20 +194,26 @@ const commentOnPost = async (req, res) => {
 
     if (commentIndex !== -1) {
       post.comments[commentIndex].comment = req.body.comment;
-      await post.save();
+
+      post = await post.save();
+
       return res.status(200).json({
         success: true,
         message: "comment updated",
+        comments: post.comments,
       });
     } else {
-      post.comments.push({
+      post.comments.unshift({
         user: req.user._id,
         comment: req.body.comment,
       });
-      await post.save();
+
+      post = await post.save();
+
       return res.status(200).json({
         success: true,
         message: "comment added",
+        comments: post.comments,
       });
     }
   } catch (error) {
@@ -282,3 +332,30 @@ const updateCaption = async (req, res) => {
 };
 
 export { updateCaption };
+
+export const getPostComments = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id).populate("comments.user");
+    return res.status(200).json({
+      comments: post.comments,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+};
+
+export const getPostLikes = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id).populate("likes");
+    return res.status(200).json({
+      likes: post.likes,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};

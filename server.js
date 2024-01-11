@@ -1,6 +1,6 @@
-import app from "../anontalks backend/app.js";
 import { connectDatabase } from "./config/database.js";
 import cloudinary from "cloudinary";
+import app from "./app.js";
 
 connectDatabase();
 

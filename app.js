@@ -1,45 +1,36 @@
 import express from "express";
 import { config } from "dotenv";
-// import cors from "cors"
+import Cors from "cors";
 import cookieParser from "cookie-parser";
-
-// IMPORTING ROUTES
-import userRouter from "../anontalks backend/routes/user.js";
-import postRouter from "../anontalks backend/routes/post.js";
 
 const app = express();
 
 config({
-  path: "./config/config.env",
+  path: "./config/.env",
 });
 
-// if(process.env.NODE_ENV !== "production"){
-//     dotenv.config({path: "./config/config.env"});
-// }
-
 // USING MIDDLEWARES
-// app.use(express.json({ limit: "50mb" }));
-app.use(express.json());
-// app.use(express.urlencoded({ limit: "50mb", extended: true }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
+app.use(cookieParser());
 app.use(
-  express.urlencoded({
-    extended: true,
+  Cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
-app.use(cookieParser());
-// app.use(cors);
+
+// IMPORTING ROUTES
+import userRoutes from "./routes/user.js";
+import postRoutes from "./routes/post.js";
 
 // USING ROUTES
-app.use("/api/v1", userRouter);
-app.use("/api/v1", postRouter);
+app.use("/api/v1", userRoutes);
+app.use("/api/v1", postRoutes);
 
 app.get("/", async (req, res) => {
   res.send("Anontalks official server");
 });
-// app.get("/api/v1", async (req, res) => {
-//   users.find().then((data) => {
-//     res.status(200).send(data);
-//   });
-// });
 
 export default app;

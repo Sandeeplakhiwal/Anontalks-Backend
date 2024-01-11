@@ -10,11 +10,20 @@ const register = async (req, res) => {
     let user = await User.findOne({ email });
 
     if (user) {
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
-        message: "User already exists!",
+        message: "Another account is using this email address!",
       });
     }
+
+    let usernameExist = await User.findOne({ name });
+    if (usernameExist) {
+      return res.status(406).json({
+        success: false,
+        message: "Username already exist, try different",
+      });
+    }
+
     user = await User.create({
       name,
       email,
@@ -29,13 +38,13 @@ const register = async (req, res) => {
       httpOnly: true,
     };
 
-    res.status(201).cookie("token", token, options).json({
+    return res.status(201).cookie("token", token, options).json({
       success: true,
       user,
       token,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -152,6 +161,92 @@ const followUser = async (req, res) => {
 };
 
 export { followUser };
+
+export const followSuggestions = async (req, res) => {
+  try {
+    // Fetch the current user's data with populated followers and following
+    const user = await User.findById(req.user._id)
+      .populate("followers")
+      .populate("following");
+
+    // Set to store unique user IDs in the final suggestions
+    const uniqueUserIds = new Set();
+
+    // Function to add suggestions to the set
+    const addSuggestionsToSet = async (suggestions) => {
+      for (const suggestion of suggestions) {
+        if (!req.user.following.some((f) => f._id.equals(suggestion._id))) {
+          uniqueUserIds.add(suggestion._id.toString());
+        }
+      }
+    };
+
+    // Fetch suggestions for each follower
+    await Promise.all(
+      user.followers.map(async (follower) => {
+        if (!follower._id.equals(req.user._id)) {
+          // Exclude the user's own followers
+          const followerData = await User.findById(follower._id).populate({
+            path: "following",
+            match: {
+              _id: {
+                $nin: [...req.user.following.map((f) => f._id), req.user._id],
+              },
+            },
+          });
+
+          // Suggestions for the follower's following
+          const followingSuggestions = followerData.following.filter(
+            (followed) =>
+              !req.user.following.some((f) => f._id.equals(followed._id))
+          );
+
+          // Suggestions for the follower's followers
+          const followersSuggestions = followerData.followers.filter(
+            (follower) =>
+              !req.user.following.some((f) => f._id.equals(follower._id))
+          );
+
+          // Add suggestions to the set
+          await addSuggestionsToSet([
+            ...followingSuggestions,
+            ...followersSuggestions,
+          ]);
+        }
+      })
+    );
+
+    // Include suggestions from the people whom the user is following
+    await Promise.all(
+      user.following.map(async (followed) => {
+        // Populate the "following" field for each person the user is following
+        const followedData = await User.findById(followed._id).populate(
+          "following"
+        );
+
+        // Add suggestions to the set
+        await addSuggestionsToSet(followedData.following);
+      })
+    );
+
+    // Fetch user objects based on unique user IDs
+    const uniqueFinalSuggestions = await User.find({
+      _id: { $in: Array.from(uniqueUserIds), $nin: [req.user._id] },
+    });
+
+    // Respond with the final list of suggestions
+    return res.status(200).json({
+      success: true,
+      users: [...uniqueFinalSuggestions],
+    });
+  } catch (error) {
+    // Handle errors and respond with an error status
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+    });
+  }
+};
 
 // Lets create updatePassword function
 const updatePassword = async (req, res) => {
@@ -526,3 +621,46 @@ const getMyPosts = async (req, res) => {
 };
 
 export { getMyPosts };
+
+// Fetch top 3 users with the largest number of followers
+export const popularSuggestions = async (req, res) => {
+  try {
+    const topUsers = await User.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "followers",
+          foreignField: "_id",
+          as: "followers",
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          avatar: 1,
+          name: 1,
+          email: 1,
+          post: 1,
+          followers: 1,
+          following: 1,
+        },
+      },
+      {
+        $sort: { followers: -1 },
+      },
+      {
+        $limit: 3,
+      },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      users: topUsers,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};

@@ -1,20 +1,22 @@
 import express from "express";
+import { isAuthenticated } from "../middlewares/auth.js";
 import {
-  register,
-  login,
+  deleteMyProfile,
+  followSuggestions,
   followUser,
+  forgotPassword,
+  getAllUsers,
+  getMyPosts,
+  getUserProfile,
+  login,
   logout,
+  myProfile,
+  popularSuggestions,
+  register,
+  resetPassword,
   updatePassword,
   updateProfile,
-  deleteMyProfile,
-  myProfile,
-  getUserProfile,
-  getAllUsers,
-  forgotPassword,
-  resetPassword,
-  getMyPosts,
-} from "../../anontalks backend/controllers/user.js";
-import { isAuthenticated } from "../middlewares/auth.js";
+} from "../controllers/user.js";
 
 const router = express.Router();
 
@@ -25,6 +27,10 @@ router.post("/login", login);
 router.get("/logout", isAuthenticated, logout);
 
 router.get("/follow/:id", isAuthenticated, followUser);
+
+router.get("/suggestions/follow", isAuthenticated, followSuggestions);
+
+router.get("/suggestions/popular/follow", isAuthenticated, popularSuggestions);
 
 router.put("/update/password", isAuthenticated, updatePassword);
 
