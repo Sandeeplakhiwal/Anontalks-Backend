@@ -56,28 +56,26 @@ import getDataUri from "../utiils/dataURI.js";
 
 export const createPost = async (req, res) => {
   try {
-    const { caption } = req.body;
-    const file = req.file;
-    if (!caption) {
+    if (!req.body.image) {
       return res.status(400).json({
         success: false,
         message: "Please enter all fields!",
       });
     }
-    if (file) {
-      const myCloud = await cloudinary.v2.uploader.upload(file, {
-        folder: "posts",
-      });
-    }
+    const myCloud = await cloudinary.v2.uploader.upload(req.body.image, {
+      folder: "posts",
+    });
+
     const newPostData = {
-      caption,
+      caption: req.body.caption ? req.body.caption : "",
       image: {
-        public_id: "myCloud.public_id",
-        url: "myCloud.secure_url",
+        public_id: myCloud.public_id,
+        url: myCloud.secure_url,
       },
       owner: req.user._id,
     };
     const newPost = await Post.create(newPostData);
+
     const user = await User.findById(req.user._id);
     user.post.unshift(newPost._id);
     await user.save();
@@ -228,7 +226,7 @@ export { commentOnPost };
 
 const deleteComment = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
+    const post = await Post.findById(req.params.pid);
 
     if (!post) {
       return res.status(404).json({
@@ -238,7 +236,7 @@ const deleteComment = async (req, res) => {
     }
 
     if (post.owner.toString() === req.user._id.toString()) {
-      if (req.body.commentId == undefined) {
+      if (req.params.cid == undefined) {
         return res.status(400).json({
           success: false,
           message: "Comment Id is Required",
@@ -247,7 +245,7 @@ const deleteComment = async (req, res) => {
 
       // Owner Koi bhi comment delete kr skta hai.
       post.comments.forEach((item, index) => {
-        if (item._id.toString() === req.body.commentId.toString()) {
+        if (item._id.toString() === req.params.cid.toString()) {
           return post.comments.splice(index, 1);
         }
       });
@@ -284,11 +282,31 @@ export const getPostOfFollowing = async (req, res) => {
 
     const posts = await Post.find({
       owner: {
-        $in: user.following,
+        $in: [...user.following, req.user._id],
       },
     }).populate("owner likes comments.user");
 
     res.status(200).json({
+      success: true,
+      posts: posts.reverse(),
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: true,
+      message: error.message,
+    });
+  }
+};
+
+export const getPostsOfUser = async (req, res) => {
+  try {
+    const posts = await Post.find({
+      owner: {
+        $in: [req.params.id],
+      },
+    }).populate("owner likes comments.user");
+
+    return res.status(200).json({
       success: true,
       posts: posts.reverse(),
     });

@@ -14,6 +14,7 @@ import {
   popularSuggestions,
   register,
   resetPassword,
+  searchUserProfile,
   updatePassword,
   updateProfile,
 } from "../controllers/user.js";
@@ -48,5 +49,7 @@ router.get("/users/all", isAuthenticated, getAllUsers);
 router.post("/forgot/password", forgotPassword);
 
 router.put("/password/reset/:token", resetPassword);
+
+router.get("/profile/search", isAuthenticated, searchUserProfile);
 
 export default router;

@@ -464,7 +464,7 @@ export { myProfile };
 const getUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).populate(
-      "post followers following"
+      "post followers following post.owner post.likes post.comments.user"
     );
 
     if (!user) {
@@ -660,7 +660,34 @@ export const popularSuggestions = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Internal Server Error",
+      message: error.message,
+    });
+  }
+};
+
+// Search a profile
+export const searchUserProfile = async (req, res) => {
+  try {
+    if (req.query.keyword === "") {
+      return res.status(200).json({
+        success: true,
+        users: [],
+      });
+    }
+    const users = await User.find({
+      name: {
+        $regex: req.query.keyword,
+        $options: "i",
+      },
+    });
+    return res.status(200).json({
+      success: true,
+      users,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };

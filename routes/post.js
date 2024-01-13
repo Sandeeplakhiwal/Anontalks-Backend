@@ -9,6 +9,7 @@ import {
   getPostComments,
   getPostLikes,
   getPostOfFollowing,
+  getPostsOfUser,
   likeAndUnlikePost,
   updateCaption,
 } from "../controllers/post.js";
@@ -20,8 +21,9 @@ router.put("/post/update/:id", isAuthenticated, updateCaption);
 router.get("/post/:id", isAuthenticated, likeAndUnlikePost);
 router.delete("/post/:id", isAuthenticated, deletePost);
 router.get("/following/posts", isAuthenticated, getPostOfFollowing);
+router.get("/user/posts/:id", isAuthenticated, getPostsOfUser);
 router.put("/post/comment/:id", isAuthenticated, commentOnPost);
-router.delete("/post/comment/:id", isAuthenticated, deleteComment);
+router.delete("/post/comment/:pid/:cid", isAuthenticated, deleteComment);
 router.get("/post/comments/:id", isAuthenticated, getPostComments);
 router.get("/post/likes/:id", isAuthenticated, getPostLikes);
 
