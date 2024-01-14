@@ -35,7 +35,8 @@ const register = async (req, res) => {
 
     let options = {
       expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
-      httpOnly: true,
+      sameSite: "none",
+      http: true,
     };
 
     return res.status(201).cookie("token", token, options).json({
@@ -80,6 +81,7 @@ const login = async (req, res) => {
     let options = {
       expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
       httpOnly: true,
+      sameSite: "none",
     };
 
     res.status(200).cookie("token", token, options).json({
@@ -102,6 +104,7 @@ const logout = async (req, res) => {
     let options = {
       expires: new Date(Date.now()),
       httpOnly: true,
+      sameSite: "none",
     };
     res.status(200).cookie("token", null, options).json({
       success: true,
@@ -422,6 +425,7 @@ const deleteMyProfile = async (req, res) => {
     let options = {
       expires: new Date(Date.now()),
       httpOnly: true,
+      sameSite: "none",
     };
 
     res.cookie("token", null, options);
