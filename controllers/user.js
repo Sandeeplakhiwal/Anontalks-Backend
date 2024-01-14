@@ -81,6 +81,8 @@ const login = async (req, res) => {
 
     const token = await user.generateToken();
 
+    console.log(token);
+
     const options = {
       httpOnly: true,
       expires: new Date(
