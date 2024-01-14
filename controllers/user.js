@@ -33,10 +33,13 @@ const register = async (req, res) => {
 
     const token = await user.generateToken();
 
-    let options = {
-      expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+    const options = {
+      httpOnly: true,
+      expires: new Date(
+        Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
+      ),
+      secure: true,
       sameSite: "none",
-      http: true,
     };
 
     return res.status(201).cookie("token", token, options).json({
@@ -78,9 +81,12 @@ const login = async (req, res) => {
 
     const token = await user.generateToken();
 
-    let options = {
-      expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+    const options = {
       httpOnly: true,
+      expires: new Date(
+        Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
+      ),
+      secure: true,
       sameSite: "none",
     };
 
@@ -101,9 +107,12 @@ export { login };
 // Lets create Logout Method
 const logout = async (req, res) => {
   try {
-    let options = {
-      expires: new Date(Date.now()),
+    const options = {
       httpOnly: true,
+      expires: new Date(
+        Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
+      ),
+      secure: true,
       sameSite: "none",
     };
     res.status(200).cookie("token", null, options).json({
@@ -422,9 +431,12 @@ const deleteMyProfile = async (req, res) => {
     await user.deleteOne();
 
     // Logout after deletion of profile
-    let options = {
-      expires: new Date(Date.now()),
+    const options = {
       httpOnly: true,
+      expires: new Date(
+        Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
+      ),
+      secure: true,
       sameSite: "none",
     };
 
