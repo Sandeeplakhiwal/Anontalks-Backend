@@ -39,7 +39,7 @@ const register = async (req, res) => {
         Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
       ),
       secure: process.env.NODE_ENV === "production",
-      // sameSite: "none",
+      sameSite: "none",
     };
 
     return res.status(201).cookie("token", token, options).json({
@@ -87,7 +87,7 @@ const login = async (req, res) => {
         Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
       ),
       secure: process.env.NODE_ENV === "production",
-      // sameSite: "none",
+      sameSite: "none",
     };
 
     res.status(200).cookie("token", token, options).json({
@@ -111,7 +111,7 @@ const logout = async (req, res) => {
       httpOnly: true,
       expires: new Date(Date.now()),
       secure: process.env.NODE_ENV === "production",
-      // sameSite: "none",
+      sameSite: "none",
     };
     res.status(200).cookie("token", null, options).json({
       success: true,
@@ -437,7 +437,7 @@ const deleteMyProfile = async (req, res) => {
       httpOnly: true,
       expires: new Date(Date.now()),
       secure: process.env.NODE_ENV === "production",
-      // sameSite: "none",
+      sameSite: "none",
     };
 
     res.cookie("token", null, options);
