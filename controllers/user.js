@@ -38,7 +38,7 @@ const register = async (req, res) => {
       expires: new Date(
         Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
       ),
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "none",
     };
 
@@ -86,7 +86,7 @@ const login = async (req, res) => {
       expires: new Date(
         Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
       ),
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "none",
     };
 
@@ -109,10 +109,8 @@ const logout = async (req, res) => {
   try {
     const options = {
       httpOnly: true,
-      expires: new Date(
-        Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
-      ),
-      secure: true,
+      expires: new Date(Date.now()),
+      secure: process.env.NODE_ENV === "production",
       sameSite: "none",
     };
     res.status(200).cookie("token", null, options).json({
@@ -362,10 +360,14 @@ export { updateProfile };
 //         await user.deleteOne();
 
 //         // Logout after deletion of profile
-//         let options = {
-//             expires: new Date(Date.now()),
-//             httpOnly: true,
-//         }
+// const options = {
+//   httpOnly: true,
+//   expires: new Date(
+//     Date.now()
+//   ),
+//   secure: process.env.NODE_ENV === "production",
+//   sameSite: "none",
+// };
 //         res.cookie("token", null, options);
 
 //         res.status(200).json({
@@ -433,10 +435,8 @@ const deleteMyProfile = async (req, res) => {
     // Logout after deletion of profile
     const options = {
       httpOnly: true,
-      expires: new Date(
-        Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
-      ),
-      secure: true,
+      expires: new Date(Date.now()),
+      secure: process.env.NODE_ENV === "production",
       sameSite: "none",
     };
 
