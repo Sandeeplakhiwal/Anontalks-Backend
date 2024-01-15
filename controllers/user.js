@@ -709,3 +709,31 @@ export const searchUserProfile = async (req, res) => {
     });
   }
 };
+
+export const getUserFollowings = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).populate("following");
+    return res.status(200).json({
+      followings: user.following,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getUserFollowers = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).populate("followers");
+    return res.status(200).json({
+      followers: user.followers,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

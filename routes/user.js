@@ -7,6 +7,8 @@ import {
   forgotPassword,
   getAllUsers,
   getMyPosts,
+  getUserFollowers,
+  getUserFollowings,
   getUserProfile,
   login,
   logout,
@@ -43,6 +45,10 @@ router.get("/me", isAuthenticated, myProfile);
 router.get("/my/posts", isAuthenticated, getMyPosts);
 
 router.get("/:id", isAuthenticated, getUserProfile);
+
+router.get("/user/followings/:id", isAuthenticated, getUserFollowings);
+
+router.get("/user/followers/:id", isAuthenticated, getUserFollowers);
 
 router.get("/users/all", isAuthenticated, getAllUsers);
 
