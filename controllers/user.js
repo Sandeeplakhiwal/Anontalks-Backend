@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import Post from "../models/post.js";
 import { sendEmail } from "../middlewares/sendEmail.js";
 import crypto from "crypto";
+import cloudinary from "cloudinary";
 
 const register = async (req, res) => {
   try {
@@ -28,7 +29,6 @@ const register = async (req, res) => {
       name,
       email,
       password,
-      avatar: { public_id: "sample_id", url: "sample_url" },
     });
 
     const token = await user.generateToken();
@@ -80,8 +80,6 @@ const login = async (req, res) => {
     }
 
     const token = await user.generateToken();
-
-    console.log(token);
 
     const options = {
       httpOnly: true,
@@ -306,6 +304,13 @@ const updateProfile = async (req, res) => {
 
     const { newName, newEmail } = req.body;
 
+    if (!newName && !newEmail) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter newName or newEmail",
+      });
+    }
+
     if (newName) {
       user.name = newName;
     }
@@ -328,6 +333,41 @@ const updateProfile = async (req, res) => {
 };
 
 export { updateProfile };
+
+export const UpdateProfileAvatar = async (req, res) => {
+  try {
+    if (!req.body.avatar) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter an image",
+      });
+    }
+    const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+      folder: "avatars",
+    });
+
+    const avatarData = {
+      public_id: myCloud.public_id,
+      url: myCloud.secure_url,
+    };
+
+    const user = await User.findById(req.body.id);
+
+    user.avatar = avatarData;
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Avatar updated successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 // Lets create deleteMyProfile function
 // const deleteMyProfile = async(req, res) => {
@@ -402,10 +442,20 @@ const deleteMyProfile = async (req, res) => {
     // Get the IDs of all the users the user is following
     const iAmFollowing = user.following;
 
+    // Removing avatar from cloudinary
+    if (user.avatar.public_id) {
+      await cloudinary.v2.uploader.destroy(user.avatar.public_id);
+    }
+
+    await user.deleteOne();
+
     // Delete all of the user's posts
-    for (let i = 0; i < posts.length; i++) {
-      const post = await Post.findById(posts[i]);
-      await post.deleteOne();
+    if (posts.length >= 1) {
+      for (let i = 0; i < posts.length; i++) {
+        const post = await Post.findById(posts[i]);
+        await cloudinary.v2.uploader.destroy(post.image.public_id);
+        await post.deleteOne();
+      }
     }
 
     // Delete the user from all follower's 'following' array
@@ -428,11 +478,30 @@ const deleteMyProfile = async (req, res) => {
       await following.save();
     }
 
-    //   Remove my Id from all liked posts: TODO
-    //   Remove my Id from all commented posts: TODO
+    //   Remove my Id from all commented posts
+    const allPosts = await Post.find({});
 
-    // Delete the user's profile
-    await user.deleteOne();
+    for (let i = 0; i < allPosts.length; i++) {
+      const post = await Post.findById(allPosts[i]._id);
+
+      for (let j = 0; j < post.comments.length; j++) {
+        if (post.comments[j].user.toString() === myId.toString()) {
+          post.comments.splice(j, 1);
+        }
+      }
+      await post.save();
+    }
+    //   Remove my Id from all liked posts
+    for (let i = 0; i < allPosts.length; i++) {
+      const post = await Post.findById(allPosts[i]._id);
+
+      for (let j = 0; j < post.likes.length; j++) {
+        if (post.likes[j].toString() === myId.toString()) {
+          post.likes.splice(j, 1);
+        }
+      }
+      await post.save();
+    }
 
     // Logout after deletion of profile
     const options = {

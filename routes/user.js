@@ -1,6 +1,7 @@
 import express from "express";
 import { isAuthenticated } from "../middlewares/auth.js";
 import {
+  UpdateProfileAvatar,
   deleteMyProfile,
   followSuggestions,
   followUser,
@@ -38,6 +39,8 @@ router.get("/suggestions/popular/follow", isAuthenticated, popularSuggestions);
 router.put("/update/password", isAuthenticated, updatePassword);
 
 router.put("/update/profile", isAuthenticated, updateProfile);
+
+router.put("/update/profile/avatar", isAuthenticated, UpdateProfileAvatar);
 
 router.delete("/profile/delete/me", isAuthenticated, deleteMyProfile);
 
