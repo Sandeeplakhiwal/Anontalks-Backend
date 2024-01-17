@@ -15,8 +15,8 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(cookieParser());
 app.use(
   Cors({
-    origin: "https://instagramsocialmedia.vercel.app",
-    // origin: "http://localhost:5173",
+    // origin: "https://instagramsocialmedia.vercel.app",
+    origin: "http://localhost:5173",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
