@@ -1,6 +1,6 @@
 import { connectDatabase } from "./config/database.js";
 import cloudinary from "cloudinary";
-import app from "./app.js";
+import app, { server } from "./app.js";
 
 connectDatabase();
 
@@ -10,6 +10,6 @@ cloudinary.v2.config({
   api_secret: process.env.CLD_API_SECRET,
 });
 
-app.listen(process.env.PORT, () => {
+server.listen(process.env.PORT, () => {
   console.log(`Server is listening on Port: ${process.env.PORT}`);
 });

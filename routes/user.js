@@ -10,6 +10,7 @@ import {
   getMyPosts,
   getUserFollowers,
   getUserFollowings,
+  getUserNameById,
   getUserProfile,
   login,
   logout,
@@ -60,5 +61,7 @@ router.post("/forgot/password", forgotPassword);
 router.put("/password/reset/:token", resetPassword);
 
 router.get("/profile/search", isAuthenticated, searchUserProfile);
+
+router.get("/username/:id", getUserNameById);
 
 export default router;

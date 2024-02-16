@@ -806,3 +806,31 @@ export const getUserFollowers = async (req, res) => {
     });
   }
 };
+
+export const getUserNameById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(401).json({
+        success: false,
+        message: "Please provide valid user id",
+      });
+    }
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found with this user id",
+      });
+    }
+    return res.status(200).json({
+      username: user.name,
+      avatar: user.avatar,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
