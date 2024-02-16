@@ -4,6 +4,7 @@ import Cors from "cors";
 import cookieParser from "cookie-parser";
 import { Server } from "socket.io";
 import http from "http";
+import { Message } from "./models/message.js";
 
 const app = express();
 
@@ -20,7 +21,7 @@ const users = {};
 
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND,
+    origin: process.env.FRONTEND | "https://instagramsocialmedia.vercel.app",
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -107,7 +108,6 @@ app.use(
 // IMPORTING ROUTES
 import userRoutes from "./routes/user.js";
 import postRoutes from "./routes/post.js";
-import { Message } from "./models/message.js";
 
 // USING ROUTES
 app.use("/api/v1", userRoutes);
