@@ -8,6 +8,8 @@ import { Message } from "./models/message.js";
 
 const app = express();
 
+console.log("okay");
+
 config({
   path: "./config/.env",
 });
