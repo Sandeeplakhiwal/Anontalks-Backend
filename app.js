@@ -23,7 +23,7 @@ const users = {};
 
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND | "https://instagramsocialmedia.vercel.app",
+    origin: process.env.FRONTEND || "https://instagramsocialmedia.vercel.app",
     methods: ["GET", "POST"],
     credentials: true,
   },
