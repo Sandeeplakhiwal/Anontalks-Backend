@@ -24,17 +24,45 @@ const users = {};
 const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND || "https://instagramsocialmedia.vercel.app",
+    // origin: "http://localhost:5173",
     methods: ["GET", "POST"],
     credentials: true,
   },
 });
+
+// Define an array to store online status of users with timing information
+const onlineUsers = [];
 
 io.on("connection", (socket) => {
   // console.log("A user connected");
 
   socket.on("user_connected", async (userId) => {
     users[userId] = socket.id;
-    // console.log("users", users);
+    // Add the user to the onlineUsers array with timing information
+    let userEntry = onlineUsers.find((entry) => entry.userId === userId);
+    if (!userEntry) {
+      // If user is not already in the onlineUsers array, create a new entry
+      userEntry = {
+        userId,
+        socketId: socket.id,
+        timing: {
+          from: new Date().toISOString(),
+          to: "", // User is still online, so 'to' is empty string for now
+        },
+      };
+      onlineUsers.push(userEntry);
+    } else {
+      userEntry.socketId = socket.id;
+      userEntry.timing.from = new Date().toISOString();
+      userEntry.timing.to = "";
+    }
+
+    // Emit event to notify all clients except the current user
+    socket.broadcast.emit("user_online", userEntry);
+
+    // Send information about online users to the newly connected user
+    socket.emit("online_users", onlineUsers);
+
     // If there are queued messages for this user, deliver them
     let messages = [];
     messages = await Message.find({ recipient: userId });
@@ -63,7 +91,6 @@ io.on("connection", (socket) => {
         content,
         createdAt,
       });
-      // console.log("done");
     } else {
       // If user is not online store the message in the database
       const newMessage = new Message({ sender, recipient, content });
@@ -79,12 +106,19 @@ io.on("connection", (socket) => {
   });
 
   socket.on("message", ({ room, message }) => {
-    // console.log(data);
     io.to(room).emit("receive-message", message);
   });
 
   socket.on("disconnect", () => {
     // console.log("User Disconnected", socket.id);
+    for (const userEntry of onlineUsers) {
+      if (userEntry.socketId === socket.id) {
+        userEntry.timing.to = new Date().toISOString();
+        // Emit event to notify all clients about user going offline
+        io.emit("user_offline", userEntry);
+        break;
+      }
+    }
     for (const userId in users) {
       if (users[userId] === socket.id) {
         delete users[userId];
