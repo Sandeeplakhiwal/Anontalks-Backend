@@ -23,15 +23,18 @@ const users = {};
 
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND || "https://instagramsocialmedia.vercel.app",
-    // origin: "http://localhost:5173",
+    // origin: process.env.FRONTEND || "https://instagramsocialmedia.vercel.app",
+    origin: "http://localhost:5173",
     methods: ["GET", "POST"],
     credentials: true,
   },
 });
 
-// Define an array to store online status of users with timing information
+// Defined an array to store online status of users with timing information
 const onlineUsers = [];
+
+// Defined an array to store pending messages to be sent when recipients come online
+const pendingMessageSeen = [];
 
 io.on("connection", (socket) => {
   // console.log("A user connected");
@@ -82,6 +85,28 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on(
+    "pending_message_seen_for_conversation",
+    ({ senderId, recipientId }) => {
+      // Handling pending message_seen events for this conversation
+      const pendingMessageForUser = pendingMessageSeen.filter(
+        (msg) => msg.recipient === recipientId && msg.sender === senderId
+      );
+      const senderSocketId = users[senderId];
+      if (pendingMessageForUser.length) {
+        io.to(senderSocketId).emit("message_has_seen", {
+          sender: pendingMessageForUser.sender,
+          recipient: pendingMessageForUser.recipient,
+        });
+        // Remove the message from the pendingMessageSeen array
+        pendingMessageSeen.splice(
+          pendingMessageSeen.indexOf(pendingMessageForUser),
+          1
+        );
+      }
+    }
+  );
+
   socket.on("private_message", ({ sender, recipient, content, createdAt }) => {
     const receiverSocketId = users[recipient];
     if (receiverSocketId) {
@@ -105,12 +130,21 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("message_seen", ({ sender, recipient }) => {
+    const senderSocketId = users[sender];
+    if (senderSocketId) {
+      io.to(senderSocketId).emit("message_has_seen", { sender, recipient });
+    } else {
+      // If recipient is offline, store the information and emit the event when recipient comes online
+      pendingMessageSeen.push({ sender, recipient });
+    }
+  });
+
   socket.on("message", ({ room, message }) => {
     io.to(room).emit("receive-message", message);
   });
 
   socket.on("disconnect", () => {
-    // console.log("User Disconnected", socket.id);
     for (const userEntry of onlineUsers) {
       if (userEntry.socketId === socket.id) {
         userEntry.timing.to = new Date().toISOString();
@@ -134,8 +168,8 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(cookieParser());
 app.use(
   Cors({
-    origin: "https://instagramsocialmedia.vercel.app",
-    // origin: "http://localhost:5173",
+    // origin: "https://instagramsocialmedia.vercel.app",
+    origin: "http://localhost:5173",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
