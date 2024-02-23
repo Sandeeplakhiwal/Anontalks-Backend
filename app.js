@@ -178,10 +178,12 @@ app.use(
 // IMPORTING ROUTES
 import userRoutes from "./routes/user.js";
 import postRoutes from "./routes/post.js";
+import messageRoutes from "./routes/message.js";
 
 // USING ROUTES
 app.use("/api/v1", userRoutes);
 app.use("/api/v1", postRoutes);
+app.use("/api/v1", messageRoutes);
 
 app.get("/", async (req, res) => {
   res.send("Anontalks official server");
