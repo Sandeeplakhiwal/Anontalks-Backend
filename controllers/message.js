@@ -25,8 +25,26 @@ export const backupMessages = async (req, res) => {
           messages: modifiedMessages,
         });
       } else {
-        // Append new messages to the existing backup
-        backupUserMessage.messages.push(...modifiedMessages);
+        // Iterate over modified messages
+        modifiedMessages.forEach((modMsg) => {
+          // Find the corresponding sender in the existing backup
+          const existingSenderMessage = backupUserMessage.messages.find(
+            (msg) => msg.sender === modMsg.sender
+          );
+
+          // If sender's messages already exist, push the modified messages into their contents array
+          if (existingSenderMessage) {
+            modMsg.contents.forEach((content) => {
+              existingSenderMessage.contents.push(content);
+            });
+          } else {
+            // If sender's messages don't exist, create a new sender entry and push the modified messages
+            backupUserMessage.messages.push({
+              sender: modMsg.sender,
+              contents: modMsg.contents,
+            });
+          }
+        });
       }
 
       // Save the backup document to the database
