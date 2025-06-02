@@ -5,6 +5,7 @@ import crypto from "crypto";
 import cloudinary from "cloudinary";
 
 const register = async (req, res) => {
+  console.log("Triggered register");
   try {
     const { name, email, password } = req.body;
 
@@ -38,7 +39,7 @@ const register = async (req, res) => {
       expires: new Date(
         Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
       ),
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
       sameSite: "none",
     };
 
@@ -81,12 +82,14 @@ const login = async (req, res) => {
 
     const token = await user.generateToken();
 
+    console.log("Token gener", token);
+
     const options = {
       httpOnly: true,
       expires: new Date(
         Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
       ),
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
       sameSite: "none",
     };
 
@@ -110,7 +113,7 @@ const logout = async (req, res) => {
     const options = {
       httpOnly: true,
       expires: new Date(Date.now()),
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
       sameSite: "none",
     };
     res.status(200).cookie("token", null, options).json({
@@ -529,6 +532,7 @@ export { deleteMyProfile };
 
 // Lets create myProfile function
 const myProfile = async (req, res) => {
+  console.log("Triggered myProfile");
   try {
     const user = await User.findById(req.user._id).populate(
       "post followers following"
@@ -539,6 +543,7 @@ const myProfile = async (req, res) => {
       user,
     });
   } catch (error) {
+    console.log("Error in myProfile:", error);
     res.status(500).json({
       success: false,
       message: error.message,

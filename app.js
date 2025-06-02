@@ -11,7 +11,7 @@ const app = express();
 console.log("okay");
 
 config({
-  path: "./config/.env",
+  path: ".env",
 });
 
 // Create HTTP server
@@ -168,8 +168,7 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(cookieParser());
 app.use(
   Cors({
-    origin: "https://instagramsocialmedia.vercel.app",
-    // origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "http://172.31.114.48:5173"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
   })

@@ -11,5 +11,7 @@ cloudinary.v2.config({
 });
 
 server.listen(process.env.PORT, () => {
-  console.log(`Server is listening on Port: ${process.env.PORT}`);
+  console.log(
+    `Server is listening on Port: http://localhost:${process.env.PORT}`
+  );
 });

@@ -2,15 +2,18 @@ import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 
 const isAuthenticated = async (req, res, next) => {
+  console.log("Triggered");
   try {
     const { token } = req.cookies;
-
+    console.log("Token:", token);
     if (!token) {
       return res.status(401).json({
         message: "Please login first!",
       });
     }
     const decoded = await jwt.verify(token, process.env.JWT_SECRET);
+
+    console.log({ decoded });
 
     req.user = await User.findById(decoded._id);
 

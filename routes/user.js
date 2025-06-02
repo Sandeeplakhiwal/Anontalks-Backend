@@ -25,7 +25,7 @@ import {
 
 const router = express.Router();
 
-router.post("/register", register);
+router.post("/create-user", register);
 
 router.post("/login", login);
 
